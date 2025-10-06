@@ -31,7 +31,9 @@ class _ExpencesScreenState extends State<ExpencesScreen> {
 
   void _showAddingNewExpenseOverlay() {
     showModalBottomSheet(
+      constraints: const BoxConstraints(maxWidth: double.infinity),
       isScrollControlled: true,
+      useSafeArea: true,
       context: context, 
       builder: (context) {
         return NewExpenseDialog(onAddNewExpense: _addExpense);
@@ -74,6 +76,13 @@ class _ExpencesScreenState extends State<ExpencesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final displayWidth = MediaQuery.of(context).size.width;
+    final isNarrow = displayWidth < 600;
+    final axis = isNarrow ? Axis.vertical : Axis.horizontal;
+
+    Widget gap(double v) =>
+        axis == Axis.vertical ? SizedBox(height: v) : SizedBox(width: v);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Expense Tracker'),
@@ -85,11 +94,17 @@ class _ExpencesScreenState extends State<ExpencesScreen> {
         ],
       ),
       body: Center(
-        child: Column(
+        child: Flex(
+          direction: axis,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Chart(expenses: _expenses),
-            SizedBox(height: 20.0,),
+            Flexible(
+              fit: isNarrow ? FlexFit.loose : FlexFit.tight,
+              child: Chart(expenses: _expenses),
+            ),
+
+            gap(20),
+            
             Expanded(
               child: _expenses.isNotEmpty
                   ? ExpensesList(
